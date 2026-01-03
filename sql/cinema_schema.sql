@@ -47,6 +47,7 @@ CREATE TABLE user_roles (
 CREATE TABLE movies (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
+  release_date DATE,
   description TEXT,
   genre VARCHAR(100),
   duration_minutes INT,
@@ -98,19 +99,6 @@ CREATE TABLE showtimes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ======================================================
---  PAYMENTS
--- ======================================================
-CREATE TABLE payments (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  booking_id INT NOT NULL,
-  amount DECIMAL(10,2) NOT NULL,
-  method VARCHAR(50), -- card, cash, paypal
-  status VARCHAR(30), -- PAID, FAILED
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (booking_id) REFERENCES bookings(id)
-);
-
--- ======================================================
 --  BOOKINGS
 -- ======================================================
 CREATE TABLE bookings (
@@ -119,16 +107,28 @@ CREATE TABLE bookings (
   showtime_id INT NOT NULL,
   total_price DECIMAL(10,2) NOT NULL,
   currency VARCHAR(5) NOT NULL DEFAULT 'MXN',
-  status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  status ENUM('PENDING','CONFIRMED','CANCELLED','EXPIRED') NOT NULL DEFAULT 'PENDING',
   booking_reference VARCHAR(50) UNIQUE,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   reserved_at DATETIME NULL,
   cancelled_at DATETIME NULL,
+  INDEX idx_bookings_user_created (user_id, created_at),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (showtime_id) REFERENCES showtimes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
+-- ======================================================
+--  PAYMENTS
+-- ======================================================
+CREATE TABLE payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  booking_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  method ENUM('CARD','CASH','PAYPAL','TRANSFER'),
+  status ENUM('PENDING','PAID','FAILED','REFUNDED') NOT NULL DEFAULT 'PENDING',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ======================================================
 --  BOOKING_SEATS
@@ -136,12 +136,14 @@ CREATE TABLE bookings (
 CREATE TABLE booking_seats (
   id INT AUTO_INCREMENT PRIMARY KEY,
   booking_id INT NOT NULL,
+  showtime_id INT NOT NULL,
   seat_id INT NOT NULL,
   price DECIMAL(8,2) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+  FOREIGN KEY (showtime_id) REFERENCES showtimes(id) ON DELETE CASCADE,
   FOREIGN KEY (seat_id) REFERENCES seats(id) ON DELETE CASCADE,
-  UNIQUE KEY ux_booking_seat (booking_id, seat_id)
+  UNIQUE KEY ux_booking_seat (showtime_id, seat_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ======================================================
@@ -149,6 +151,9 @@ CREATE TABLE booking_seats (
 -- ======================================================
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_movies_title ON movies(title);
+CREATE INDEX idx_booking_reference ON bookings(booking_reference);
+CREATE INDEX idx_booking_seats_booking ON booking_seats (booking_id);
+CREATE INDEX idx_bookings_showtime ON bookings(showtime_id);
 
 -- ======================================================
 --  INSERTAR ROLES

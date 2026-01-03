@@ -1,21 +1,17 @@
-<!DOCTYPE html>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
   <head>
-    <title>CINEMA PLEASE</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    />
+    <title>CINEMA</title>
   </head>
   <body>
-    <div class="container mt-5">
-      <h1 class="text-center">🎥 Bienvenido a CINEMA PLEASE 🎬</h1>
-      <p class="text-center">
-        Administra tus películas, horarios y reservas fácilmente.
-      </p>
-      <div class="text-center mt-4">
-        <a href="movies" class="btn btn-primary">Ver Cartelera</a>
-      </div>
-    </div>
+    <h1>🎬 CINEMA</h1>
+    <p>View Movies</p>
+
+    <button onclick="location.href='movies'">Movies List</button>
+    <button onclick="location.href='add-movie'">Add Movie</button>
+    <button onclick="location.href='search-movie'">Search Movie</button>
+    <button onclick="location.href='directors'">Directors List</button>
+    <button onclick="location.href='add-director'">Add Director</button>
+    <button onclick="location.href='search-director'">Search Director</button>
   </body>
 </html>
