@@ -8,10 +8,5 @@
     <p>View Movies</p>
 
     <button onclick="location.href='movies'">Movies List</button>
-    <button onclick="location.href='add-movie'">Add Movie</button>
-    <button onclick="location.href='search-movie'">Search Movie</button>
-    <button onclick="location.href='directors'">Directors List</button>
-    <button onclick="location.href='add-director'">Add Director</button>
-    <button onclick="location.href='search-director'">Search Director</button>
   </body>
 </html>

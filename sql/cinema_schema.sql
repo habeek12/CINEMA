@@ -53,7 +53,7 @@ CREATE TABLE movies (
   duration_minutes INT,
   language VARCHAR(50),
   rating VARCHAR(10),
-  poster_url VARCHAR(512) DEFAULT '/img/default_poster.png',
+  poster_url VARCHAR(512) DEFAULT '/img/nayeon.jpg',
   active TINYINT(1) DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

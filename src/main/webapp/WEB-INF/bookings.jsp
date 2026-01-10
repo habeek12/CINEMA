@@ -7,7 +7,7 @@
     <p>Status: ${b.status}</p>
     <p>Total: $${b.totalPrice}</p>
 
-    <c:if test="${b.status == 'PENDING'}">
+    <c:if test="${b.status eq 'PENDING'}">
       <form action="/pay" method="post">
         <input type="hidden" name="bookingId" value="${b.id}" />
         <select name="method">
@@ -16,7 +16,14 @@
           <option value="PAYPAL">PayPal</option>
           <option value="TRANSFER">Transfer</option>
         </select>
-        <button type="submit">Pay</button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          onclick="this.disabled=true; this.form.submit();"
+        >
+          Pay
+        </button>
+        <button formaction="/cancel" formmethod="post">Cancel Booking</button>
       </form>
     </c:if>
   </div>

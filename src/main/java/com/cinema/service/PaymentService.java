@@ -28,12 +28,14 @@ public class PaymentService {
       Payment.Method method) {
     Booking booking = bookingRepository.findById(bookingId)
         .orElseThrow(() -> new RuntimeException("Booking not found"));
-    if (paymentRepository.existsById(bookingId)) {
-      throw new RuntimeException("Payment already exists for this booking");
+    // 🔒 PROTECCIÓN 1: estado válido
+    if (booking.getStatus() != Booking.Status.PENDING) {
+      throw new RuntimeException("Booking cannot be paid in current state");
     }
 
-    if (!booking.getStatus().equals(Booking.Status.PENDING)) {
-      throw new RuntimeException("Booking already paid or cancelled");
+    // 🔒 PROTECCIÓN 2: pago existente (idempotencia)
+    if (paymentRepository.existsByBooking_Id(bookingId)) {
+      return; // idempotente: no vuelve a cobrar
     }
 
     Payment payment = new Payment();
@@ -45,6 +47,5 @@ public class PaymentService {
 
     booking.setStatus(Booking.Status.CONFIRMED);
     booking.setReservedAt(java.time.LocalDateTime.now());
-    bookingRepository.save(booking);
   }
 }

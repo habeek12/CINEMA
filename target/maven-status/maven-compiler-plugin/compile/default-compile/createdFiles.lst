@@ -12,11 +12,14 @@ com\cinema\model\BookingSeat.class
 com\cinema\controller\ShowtimeController.class
 com\cinema\controller\BookingController.class
 com\cinema\model\Movie.class
+com\cinema\config\SecurityConfig.class
 com\cinema\repository\BookingRepository.class
 com\cinema\repository\SeatRepository.class
 com\cinema\model\Payment$Status.class
 com\cinema\repository\UserRepository.class
+com\cinema\security\CustomUserDetails.class
 com\cinema\service\ShowtimeService.class
+com\cinema\security\CustomUserDetailsService.class
 com\cinema\model\Role.class
 com\cinema\model\Payment$Method.class
 com\cinema\exception\SeatUnavailableException.class
@@ -26,6 +29,7 @@ com\cinema\service\MovieService.class
 com\cinema\repository\BookingSeatRepository.class
 com\cinema\repository\ShowtimeRepository.class
 com\cinema\service\UserService.class
+com\cinema\service\BookingExpirationService.class
 com\cinema\dto\BookingRequestDTO.class
 com\cinema\model\User.class
 com\cinema\CinemaApplication.class

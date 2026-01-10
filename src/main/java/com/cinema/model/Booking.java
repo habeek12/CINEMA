@@ -39,7 +39,7 @@ public class Booking {
 
   // RELATIONSHIPS
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
   @ManyToOne
@@ -71,13 +71,18 @@ public class Booking {
   @Column(name = "cancelled_at")
   private LocalDateTime cancelledAt;
 
+  @Column(name = "expires_at")
+  private LocalDateTime expiresAt;
+
   // LIFECYCLE
   @PrePersist
   void onCreate() {
-    this.createdAt = LocalDateTime.now();
-    this.reservedAt = LocalDateTime.now();
-    this.status = Status.PENDING;
-    this.currency = "MXN";
+    if (currency == null) {
+      this.currency = "MXN";
+    }
+    if (createdAt == null) {
+      this.createdAt = LocalDateTime.now();
+    }
   }
 
   public Integer getId() {
@@ -146,5 +151,25 @@ public class Booking {
 
   public void setSeats(List<BookingSeat> seats) {
     this.seats = seats;
+  }
+
+  public LocalDateTime getCancelledAt() {
+    return cancelledAt;
+  }
+
+  public void setCancelledAt(LocalDateTime cancelledAt) {
+    this.cancelledAt = cancelledAt;
+  }
+
+  public LocalDateTime getExpiresAt() {
+    return expiresAt;
+  }
+
+  public void setExpiresAt(LocalDateTime expiresAt) {
+    this.expiresAt = expiresAt;
+  }
+
+  public void setCreatedAt(LocalDateTime now) {
+    this.createdAt = now;
   }
 }

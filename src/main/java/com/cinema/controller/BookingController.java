@@ -1,7 +1,10 @@
 package com.cinema.controller;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,8 +18,10 @@ import com.cinema.service.BookingService;
 import com.cinema.service.PaymentService;
 import com.cinema.service.UserService;
 
+import jakarta.validation.Valid;
+
 @Controller
-@RequestMapping
+@RequestMapping("/booking")
 public class BookingController {
 
   private final UserService userService;
@@ -33,17 +38,30 @@ public class BookingController {
     this.paymentService = paymentService;
   }
 
+  private User getCurrentUser() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    return userService.findByUsername(auth.getName());
+  }
+
   @GetMapping("/bookings")
   public String myBookings(Model model) {
-    model.addAttribute("bookings", bookingService.getAll());
+    User user = getCurrentUser();
+    model.addAttribute("bookings", bookingService.getBookingsForUser(user));
     return "bookings";
   }
 
   @PostMapping("/book")
-  public String bookSeats(@ModelAttribute BookingRequestDTO dto) {
-    User user = userService.findByUsername("juan"); // TODO: Replace with authenticated user (Spring Security)
+  public String bookSeats(
+      @Valid @ModelAttribute BookingRequestDTO dto,
+      BindingResult result) {
+
+    if (result.hasErrors()) {
+      return "booking-form";
+    }
+
+    User user = getCurrentUser();
     bookingService.createBooking(user, dto);
-    return "redirect:/bookings";
+    return "redirect:/booking/bookings";
   }
 
   @PostMapping("/pay")
@@ -52,6 +70,13 @@ public class BookingController {
       @RequestParam Payment.Method method) {
 
     paymentService.payBooking(bookingId, method);
-    return "redirect:/bookings";
+    return "redirect:/booking/bookings";
+  }
+
+  @PostMapping("/cancel")
+  public String cancelBooking(@RequestParam Integer bookingId) {
+    User user = getCurrentUser();
+    bookingService.cancelBooking(bookingId, user);
+    return "redirect:/booking/bookings";
   }
 }

@@ -2,9 +2,14 @@ package com.cinema.dto;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 public class BookingRequestDTO {
 
+  @NotNull
   private Integer showtimeId;
+  @NotEmpty
   private List<Integer> seatIds;
 
   public Integer getShowtimeId() {

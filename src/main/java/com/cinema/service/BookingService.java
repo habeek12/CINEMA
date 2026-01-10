@@ -1,6 +1,7 @@
 package com.cinema.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -48,17 +49,29 @@ public class BookingService {
 
     List<Seat> seats = seatRepository.findAllById(dto.getSeatIds());
 
+    if (dto.getSeatIds() == null || dto.getSeatIds().isEmpty()) {
+      throw new RuntimeException("At least one seat must be selected");
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+
     Booking booking = new Booking();
     booking.setUser(user);
     booking.setShowtime(showtime);
     booking.setBookingReference(UUID.randomUUID().toString());
     booking.setSeats(new ArrayList<>());
+    booking.setStatus(Booking.Status.PENDING);
+    booking.setCreatedAt(now);
+    booking.setExpiresAt(now.plusMinutes(10));
 
     BigDecimal total = BigDecimal.ZERO;
 
     for (Seat seat : seats) {
       boolean occupied = bookingSeatRepository
-          .existsByShowtime_IdAndSeat_Id(showtime.getId(), seat.getId());
+          .existsByShowtime_IdAndSeat_IdAndBooking_StatusIn(
+              showtime.getId(),
+              seat.getId(),
+              List.of(Booking.Status.PENDING, Booking.Status.CONFIRMED));
 
       if (occupied) {
         throw new SeatUnavailableException(
@@ -77,11 +90,28 @@ public class BookingService {
 
     booking.setTotalPrice(total);
     return bookingRepository.save(booking);
-
   }
 
-  public List<Booking> getAll() {
-    return bookingRepository.findAll();
+  public List<Booking> getBookingsForUser(User user) {
+    return bookingRepository.findByUser_Id(user.getId());
+  }
+
+  @Transactional
+  public void cancelBooking(Integer bookingId, User user) {
+
+    Booking booking = bookingRepository.findById(bookingId)
+        .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+    if (!booking.getUser().getId().equals(user.getId())) {
+      throw new RuntimeException("Unauthorized booking access");
+    }
+
+    if (booking.getStatus() == Booking.Status.CONFIRMED) {
+      throw new RuntimeException("Cannot cancel confirmed booking");
+    }
+
+    booking.setStatus(Booking.Status.CANCELLED);
+    booking.setCancelledAt(LocalDateTime.now());
   }
 
 }
